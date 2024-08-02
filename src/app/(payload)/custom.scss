@@ -1,0 +1,16 @@
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  --radius: 0.5rem;
+  --border: 240 6% 90%;
+}
+
+
+
+.toolbar-popup__dropdown-items .fixed-toolbar__dropdown-items {
+  // background-color: hsl(20 14.3% 4.1%);
+  background-color: red !important;
+}
+
+
