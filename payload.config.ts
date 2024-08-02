@@ -7,6 +7,7 @@ import {
   BlocksFeature,
   BoldFeature,
   ChecklistFeature,
+  FixedToolbarFeature,
   HeadingFeature,
   IndentFeature,
   InlineCodeFeature,
@@ -18,19 +19,51 @@ import {
   RelationshipFeature,
   UnorderedListFeature,
   UploadFeature,
+  TreeViewFeature
 } from '@payloadcms/richtext-lexical'
 //import { slateEditor } from '@payloadcms/richtext-slate'
 import { mongooseAdapter } from '@payloadcms/db-mongodb'
 import { buildConfig } from 'payload'
 import sharp from 'sharp'
 import { fileURLToPath } from 'url'
+import { FontColorFeature } from '@/lexical/features/fontColorFeature/feature.server'
 
 const filename = fileURLToPath(import.meta.url)
 const dirname = path.dirname(filename)
 
 export default buildConfig({
-  //editor: slateEditor({}),
-  editor: lexicalEditor(),
+  editor: lexicalEditor({
+    features: ({ defaultFeatures }) => {
+      return [
+        ...defaultFeatures,
+        TreeViewFeature(),
+        FontColorFeature(),
+        FixedToolbarFeature(),
+        // EmbedFeature(),
+        LinkFeature({
+          fields: ({ defaultFields }) => {
+            const defaultFieldsWithoutUrl = defaultFields.filter((field) => {
+              if ('name' in field && field.name === 'url') return false
+              return true
+            })
+
+            return [
+              ...defaultFieldsWithoutUrl,
+              {
+                name: 'url',
+                type: 'text',
+                admin: {
+                  condition: ({ linkType }) => linkType !== 'internal',
+                },
+                label: ({ t }) => t('fields:enterURL'),
+                required: true,
+              },
+            ]
+          },
+        }),
+      ]
+    },
+  }),
   collections: [
     {
       slug: 'users',
@@ -42,28 +75,12 @@ export default buildConfig({
       fields: [],
     },
     {
-      slug: 'pages',
-      admin: {
-        useAsTitle: 'title',
-      },
+      slug: 'hero',
       fields: [
         {
-          name: 'title',
-          type: 'text',
-        },
-        {
-          name: 'content',
+          name: 'richText',
           type: 'richText',
-        },
-      ],
-    },
-    {
-      slug: 'media',
-      upload: true,
-      fields: [
-        {
-          name: 'text',
-          type: 'text',
+          label: false,
         },
       ],
     },
